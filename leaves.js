@@ -116,7 +116,7 @@ javascript:(function(){
                     this.velocityX*=this.friction;
                     this.rotation+=this.rotationSpeed;
                     this.rotationSpeed*=0.97;
-                    const groundY=window.innerHeight-20;
+                    const groundY=window.innerHeight-(this.element.height?this.element.height*0.7:20);
                     if(this.y>=groundY){
                         this.y=groundY;
                         this.velocityY*=-this.bounce;
