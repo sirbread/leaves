@@ -1,6 +1,9 @@
 javascript:(function(){
     if(window.leavesActive){return;}
     window.leavesActive=true;
+    const container=document.createElement('div');
+    container.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:999998;overflow:hidden;';
+    document.body.appendChild(container);
     const style=document.createElement('style');
     style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}`;
     document.head.appendChild(style);
@@ -22,7 +25,7 @@ javascript:(function(){
             this.element.src=leafImages[Math.floor(Math.random()*leafImages.length)];
             this.element.style.width=(30+Math.random()*40)+'px';
             this.element.draggable=false;
-            document.body.appendChild(this.element);
+            container.appendChild(this.element);
             this.x=Math.random()*window.innerWidth;
             this.y=-100;
             this.time=0;
@@ -163,6 +166,7 @@ javascript:(function(){
         leaves.forEach(leaf=>leaf.element.remove());
         removeBtn.remove();
         style.remove();
+        container.remove();
         window.leavesActive=false;
     };
     document.body.appendChild(removeBtn);
