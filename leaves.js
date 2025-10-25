@@ -33,7 +33,7 @@ javascript:(function(){
             this.y=-100;
             this.time=0;
             this.velocityY=0.5+Math.random()*1.5;
-            this.velocityX=(Math.random()-0.5)*2;
+            this.velocityX=(Math.random()-0.5)*1;
             this.rotation=Math.random()*360;
             this.rotationSpeed=(Math.random()-0.5)*5;
             this.swayAmplitude=20+Math.random()*30;
@@ -81,7 +81,7 @@ javascript:(function(){
             this.time+=0.016;
             if(!this.isResting){
                 this.velocityY+=0.08;
-                this.velocityY=Math.min(this.velocityY,4);
+                this.velocityY=Math.min(this.velocityY,3);
                 const sway=Math.sin(this.time*this.swaySpeed+this.swayOffset)*this.swayAmplitude*0.1;
                 this.x+=this.velocityX+sway;
                 this.y+=this.velocityY;
