@@ -17,7 +17,10 @@ javascript:(function(){
         mouse.y=e.clientY;
         mouse.speedX=(mouse.x-mouse.prevX)*0.5;
         mouse.speedY=(mouse.y-mouse.prevY)*0.5;
-    });
+        if (Math.abs(mouse.x - mouse.prevX) > 50 || Math.abs(mouse.y - mouse.prevY) > 50) {
+            mouse.speedX = 0;
+            mouse.speedY = 0;
+        }});
     class Leaf{
         constructor(){
             this.element=document.createElement('img');
@@ -49,49 +52,19 @@ javascript:(function(){
             this.setupInteraction();
         }
         setupInteraction(){
-            this.element.addEventListener('mousedown',(e)=>{
-                e.preventDefault();
-                this.isDragging=true;
-                this.lastMouseX=e.clientX;
-                this.lastMouseY=e.clientY;
-                this.element.style.cursor='grabbing';
-                this.isResting=false;
-            });
-            document.addEventListener('mousemove',(e)=>{
-                if(this.isDragging){
-                    this.dragVelocityX=(e.clientX-this.lastMouseX)*0.5;
-                    this.dragVelocityY=(e.clientY-this.lastMouseY)*0.5;
-                    this.x=e.clientX;
-                    this.y=e.clientY;
-                    this.lastMouseX=e.clientX;
-                    this.lastMouseY=e.clientY;
-                    this.isResting=false;
-                }
-            });
-            document.addEventListener('mouseup',()=>{
-                if(this.isDragging){
-                    this.isDragging=false;
-                    this.element.style.cursor='pointer';
-                    this.velocityX=this.dragVelocityX*0.5;
-                    this.velocityY=this.dragVelocityY*0.5;
-                    this.rotationSpeed=(Math.random()-0.5)*15;
-                }
-            });
             this.element.addEventListener('click',(e)=>{
-                if(!this.isDragging){
-                    this.velocityY=-8-Math.random()*4;
-                    this.velocityX=(Math.random()-0.5)*6;
-                    this.rotationSpeed=(Math.random()-0.5)*15;
-                    this.isResting=false;
-                }
+                this.velocityY=-8-Math.random()*4;
+                this.velocityX=(Math.random()-0.5)*6;
+                this.rotationSpeed=(Math.random()-0.5)*15;
+                this.isResting=false;
             });
         }
         checkMouseInteraction(){
             const dx=this.x-mouse.x;
             const dy=this.y-mouse.y;
             const distance=Math.sqrt(dx*dx+dy*dy);
-            const interactionRadius=60;
-            if(distance<interactionRadius){
+            const cursorRadius=40;
+            if(distance<cursorRadius){
                 const mouseSpeed=Math.sqrt(mouse.speedX*mouse.speedX+mouse.speedY*mouse.speedY);
                 const force=Math.max(mouseSpeed*0.8,5);
                 const angle=Math.atan2(dy,dx);
@@ -105,47 +78,42 @@ javascript:(function(){
         }
         update(){
             this.checkMouseInteraction();
-            if(!this.isDragging){
-                this.time+=0.016;
-                if(!this.isResting){
-                    this.velocityY+=0.08;
-                    this.velocityY=Math.min(this.velocityY,4);
-                    const sway=Math.sin(this.time*this.swaySpeed+this.swayOffset)*this.swayAmplitude*0.1;
-                    this.x+=this.velocityX+sway;
-                    this.y+=this.velocityY;
-                    this.velocityX*=this.friction;
-                    this.rotation+=this.rotationSpeed;
-                    this.rotationSpeed*=0.97;
-                    const groundY=window.innerHeight-(this.element.height?this.element.height*0.7:20);
-                    if(this.y>=groundY){
-                        this.y=groundY;
-                        this.velocityY*=-this.bounce;
-                        if(Math.abs(this.velocityY)<0.5&&Math.abs(this.velocityX)<0.5){
-                            this.isResting=true;
-                            this.restY=groundY;
-                            this.restX=this.x;
-                            this.velocityY=0;
-                            this.velocityX=0;
-                            this.rotationSpeed*=0.5;
-                        }
+            this.time+=0.016;
+            if(!this.isResting){
+                this.velocityY+=0.08;
+                this.velocityY=Math.min(this.velocityY,4);
+                const sway=Math.sin(this.time*this.swaySpeed+this.swayOffset)*this.swayAmplitude*0.1;
+                this.x+=this.velocityX+sway;
+                this.y+=this.velocityY;
+                this.velocityX*=this.friction;
+                this.rotation+=this.rotationSpeed;
+                this.rotationSpeed*=0.97;
+                const groundY=window.innerHeight-(this.element.height?this.element.height*0.7:20);
+                if(this.y>=groundY){
+                    this.y=groundY;
+                    this.velocityY*=-this.bounce;
+                    if(Math.abs(this.velocityY)<0.5&&Math.abs(this.velocityX)<0.5){
+                        this.isResting=true;
+                        this.restY=groundY;
+                        this.restX=this.x;
+                        this.velocityY=0;
+                        this.velocityX=0;
+                        this.rotationSpeed*=0.5;
                     }
-                    if(this.x<-50){
-                        this.x=-50;
-                        this.velocityX*=-0.5;
-                    }
-                    if(this.x>window.innerWidth+50){
-                        this.x=window.innerWidth+50;
-                        this.velocityX*=-0.5;
-                    }
-                }else{
-                    this.x=this.restX;
-                    this.y=this.restY;
-                    this.rotation+=this.rotationSpeed;
-                    this.rotationSpeed*=0.95;
+                }
+                if(this.x<-50){
+                    this.x=-50;
+                    this.velocityX*=-0.5;
+                }
+                if(this.x>window.innerWidth+50){
+                    this.x=window.innerWidth+50;
+                    this.velocityX*=-0.5;
                 }
             }else{
-                this.dragVelocityX*=0.95;
-                this.dragVelocityY*=0.95;
+                this.x=this.restX;
+                this.y=this.restY;
+                this.rotation+=this.rotationSpeed;
+                this.rotationSpeed*=0.95;
             }
             const wobble=this.isResting?Math.sin(this.time)*2:Math.sin(this.time*2)*10;
             this.element.style.transform=`translate(${this.x}px,${this.y}px) rotate(${this.rotation+wobble}deg)`;
