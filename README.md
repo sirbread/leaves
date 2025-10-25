@@ -1,9 +1,10 @@
 # leaves
 todo
-- fix infinite bouncing
-- add leaf svgs
-- fix hitboxes
-- fix clumping
-- more leaves, larger leaves
-- add scroll support
-- dynamic leaf adding
+- add leaves slider (dynamic)
+- add leaf swaying
+- variable leaf size
+- more leaf pics
+- add scrollbar support
+- add rake, leafblower, and leaf magnet, and exit in one menu
+- fix edge detection blasing the leaf outta the galaxy
+- add limit to flinging

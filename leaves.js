@@ -1,176 +1,169 @@
-javascript:(function () {
-  if (window.leafSimActive) {
-    window.leafSimCleanup();
-    return;
-  }
-
-  window.leafSimActive = true;
-
-  const c = document.createElement('canvas');
-  Object.assign(c.style, {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    zIndex: 999999999,
-    pointerEvents: 'none'
-  });
-  document.body.appendChild(c);
-
-  let mode = 'normal';
-
-  const menu = document.createElement('div');
-  Object.assign(menu.style, {
-    position: 'fixed',
-    left: '10px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    zIndex: 1000000000,
-    background: 'rgba(0,0,0,0.7)',
-    color: 'white',
-    padding: '10px',
-    borderRadius: '5px',
-    fontFamily: 'Arial, sans-serif',
-    fontSize: '12px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  });
-  document.body.appendChild(menu);
-
-  const toggleBtn = document.createElement('button');
-  toggleBtn.textContent = '☰';
-  toggleBtn.style.margin = '5px';
-  toggleBtn.onclick = () => {
-    const isOpen = blowerBtn.style.display === 'block';
-    blowerBtn.style.display = isOpen ? 'none' : 'block';
-    rakeBtn.style.display = isOpen ? 'none' : 'block';
-    clearBtn.style.display = isOpen ? 'none' : 'block';
-    toggleBtn.textContent = isOpen ? '☰' : '✕';
-  };
-  menu.appendChild(toggleBtn);
-
-  const blowerBtn = document.createElement('button');
-  blowerBtn.textContent = 'Leafblower';
-  blowerBtn.style.margin = '5px';
-  blowerBtn.style.display = 'none';
-  blowerBtn.onclick = () => { mode = 'blower'; };
-  menu.appendChild(blowerBtn);
-
-  const rakeBtn = document.createElement('button');
-  rakeBtn.textContent = 'Rake';
-  rakeBtn.style.margin = '5px';
-  rakeBtn.style.display = 'none';
-  rakeBtn.onclick = () => { mode = 'rake'; };
-  menu.appendChild(rakeBtn);
-
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'Clear All';
-  clearBtn.style.margin = '5px';
-  clearBtn.style.display = 'none';
-  clearBtn.onclick = () => { L.length = 0; };
-  menu.appendChild(clearBtn);
-
-  const x = c.getContext('2d');
-  const L = [];
-  const n = 60;
-  let m = { x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0 };
-
-  function r() {
-    c.width = innerWidth;
-    c.height = innerHeight;
-  }
-  addEventListener('resize', r);
-  r();
-
-  function mk() {
-    return {
-      x: Math.random() * c.width,
-      y: Math.random() * c.height,
-      vx: (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2,
-      size: 14 + Math.random() * 20,
-      rot: Math.random() * Math.PI * 2,
-      spin: (Math.random() - 0.5) * 0.1,
-      emoji: ['🍂', '🍃', '🍁'][Math.floor(Math.random() * 3)]
-    };
-  }
-
-  for (let i = 0; i < n; i++) {
-    L.push(mk());
-  }
-
-  addEventListener('mousemove', function (e) {
-    m.px = m.x;
-    m.py = m.y;
-    m.x = e.clientX;
-    m.y = e.clientY;
-    m.vx = m.x - m.px;
-    m.vy = m.y - m.py;
-  });
-
-  function u() {
-    x.clearRect(0, 0, c.width, c.height);
-    for (let l of L) {
-      l.vy += 0.05;
-      l.vx *= 0.99;
-      l.vy *= 0.99;
-
-      const dx = l.x - m.x,
-            dy = l.y - m.y,
-            d = Math.hypot(dx, dy);
-
-      if (d < 60) {
-        const f = (60 - d) / 60;
-        let force = 0.2;
-        if (mode === 'blower') force = 1.0;
-        l.vx += m.vx * force * f;
-        l.vy += m.vy * force * f;
-      }
-
-      if (mode === 'rake') {
-        const dx = m.x - l.x;
-        const dy = m.y - l.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist > 0) {
-          l.vx += dx / dist * 0.3;
-          l.vy += dy / dist * 0.3;
+javascript:(function(){
+    if(window.leavesActive){return;}
+    window.leavesActive=true;
+    const style=document.createElement('style');
+    style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}`;
+    document.head.appendChild(style);
+    const leaves=[];
+    const leafImages=['https://hc-cdn.hel1.your-objectstorage.com/s/v3/c0cfd076523a1494b43f3deff2b3d7e012c892a4_image.png'];
+    const mouse={x:0,y:0,prevX:0,prevY:0,speedX:0,speedY:0};
+    document.addEventListener('mousemove',(e)=>{
+        mouse.prevX=mouse.x;
+        mouse.prevY=mouse.y;
+        mouse.x=e.clientX;
+        mouse.y=e.clientY;
+        mouse.speedX=(mouse.x-mouse.prevX)*0.5;
+        mouse.speedY=(mouse.y-mouse.prevY)*0.5;
+    });
+    class Leaf{
+        constructor(){
+            this.element=document.createElement('img');
+            this.element.className='autumn-leaf';
+            this.element.src=leafImages[Math.floor(Math.random()*leafImages.length)];
+            this.element.style.width=(30+Math.random()*40)+'px';
+            this.element.draggable=false;
+            document.body.appendChild(this.element);
+            this.x=Math.random()*window.innerWidth;
+            this.y=-100;
+            this.time=0;
+            this.velocityY=0.5+Math.random()*1.5;
+            this.velocityX=(Math.random()-0.5)*2;
+            this.rotation=Math.random()*360;
+            this.rotationSpeed=(Math.random()-0.5)*5;
+            this.swayAmplitude=20+Math.random()*30;
+            this.swaySpeed=0.02+Math.random()*0.03;
+            this.swayOffset=Math.random()*Math.PI*2;
+            this.isDragging=false;
+            this.dragVelocityX=0;
+            this.dragVelocityY=0;
+            this.lastMouseX=0;
+            this.lastMouseY=0;
+            this.isResting=false;
+            this.restY=0;
+            this.restX=0;
+            this.friction=0.98;
+            this.bounce=0.3;
+            this.setupInteraction();
         }
-      }
-
-      l.x += l.vx;
-      l.y += l.vy;
-      l.rot += l.spin;
-
-      if (l.x < 0 || l.x > c.width) {
-        l.vx *= -0.7;
-        l.x = Math.max(0, Math.min(c.width, l.x));
-      }
-
-      if (l.y > c.height) {
-        l.vy *= -0.7;
-        l.y = c.height;
-      }
-
-      x.save();
-      x.translate(l.x, l.y);
-      x.rotate(l.rot);
-      x.font = l.size + 'px serif';
-      x.fillText(l.emoji, 0, 0);
-      x.restore();
+        setupInteraction(){
+            this.element.addEventListener('mousedown',(e)=>{
+                e.preventDefault();
+                this.isDragging=true;
+                this.lastMouseX=e.clientX;
+                this.lastMouseY=e.clientY;
+                this.element.style.cursor='grabbing';
+                this.isResting=false;
+            });
+            document.addEventListener('mousemove',(e)=>{
+                if(this.isDragging){
+                    this.dragVelocityX=(e.clientX-this.lastMouseX)*0.5;
+                    this.dragVelocityY=(e.clientY-this.lastMouseY)*0.5;
+                    this.x=e.clientX;
+                    this.y=e.clientY;
+                    this.lastMouseX=e.clientX;
+                    this.lastMouseY=e.clientY;
+                    this.isResting=false;
+                }
+            });
+            document.addEventListener('mouseup',()=>{
+                if(this.isDragging){
+                    this.isDragging=false;
+                    this.element.style.cursor='pointer';
+                    this.velocityX=this.dragVelocityX*0.5;
+                    this.velocityY=this.dragVelocityY*0.5;
+                    this.rotationSpeed=(Math.random()-0.5)*15;
+                }
+            });
+            this.element.addEventListener('click',(e)=>{
+                if(!this.isDragging){
+                    this.velocityY=-8-Math.random()*4;
+                    this.velocityX=(Math.random()-0.5)*6;
+                    this.rotationSpeed=(Math.random()-0.5)*15;
+                    this.isResting=false;
+                }
+            });
+        }
+        checkMouseInteraction(){
+            const dx=this.x-mouse.x;
+            const dy=this.y-mouse.y;
+            const distance=Math.sqrt(dx*dx+dy*dy);
+            const interactionRadius=60;
+            if(distance<interactionRadius){
+                const mouseSpeed=Math.sqrt(mouse.speedX*mouse.speedX+mouse.speedY*mouse.speedY);
+                const force=Math.max(mouseSpeed*0.8,5);
+                const angle=Math.atan2(dy,dx);
+                const pushX=Math.cos(angle)*force;
+                const pushY=Math.sin(angle)*force;
+                this.velocityX+=pushX;
+                this.velocityY+=pushY-2;
+                this.rotationSpeed+=(Math.random()-0.5)*20;
+                this.isResting=false;
+            }
+        }
+        update(){
+            this.checkMouseInteraction();
+            if(!this.isDragging){
+                this.time+=0.016;
+                if(!this.isResting){
+                    this.velocityY+=0.08;
+                    this.velocityY=Math.min(this.velocityY,4);
+                    const sway=Math.sin(this.time*this.swaySpeed+this.swayOffset)*this.swayAmplitude*0.1;
+                    this.x+=this.velocityX+sway;
+                    this.y+=this.velocityY;
+                    this.velocityX*=this.friction;
+                    this.rotation+=this.rotationSpeed;
+                    this.rotationSpeed*=0.97;
+                    const groundY=window.innerHeight-20;
+                    if(this.y>=groundY){
+                        this.y=groundY;
+                        this.velocityY*=-this.bounce;
+                        if(Math.abs(this.velocityY)<0.5&&Math.abs(this.velocityX)<0.5){
+                            this.isResting=true;
+                            this.restY=groundY;
+                            this.restX=this.x;
+                            this.velocityY=0;
+                            this.velocityX=0;
+                            this.rotationSpeed*=0.5;
+                        }
+                    }
+                    if(this.x<-50){
+                        this.x=-50;
+                        this.velocityX*=-0.5;
+                    }
+                    if(this.x>window.innerWidth+50){
+                        this.x=window.innerWidth+50;
+                        this.velocityX*=-0.5;
+                    }
+                }else{
+                    this.x=this.restX;
+                    this.y=this.restY;
+                    this.rotation+=this.rotationSpeed;
+                    this.rotationSpeed*=0.95;
+                }
+            }else{
+                this.dragVelocityX*=0.95;
+                this.dragVelocityY*=0.95;
+            }
+            const wobble=this.isResting?Math.sin(this.time)*2:Math.sin(this.time*2)*10;
+            this.element.style.transform=`translate(${this.x}px,${this.y}px) rotate(${this.rotation+wobble}deg)`;
+        }
     }
-
-    requestAnimationFrame(u);
-  }
-
-  u();
-
-  window.leafSimCleanup = function () {
-    window.leafSimActive = false;
-    removeEventListener('resize', r);
-    c.remove();
-    menu.remove();
-  };
+    function animate(){
+        leaves.forEach(leaf=>leaf.update());
+        requestAnimationFrame(animate);
+    }
+    for(let i=0;i<100;i++){
+        setTimeout(()=>{leaves.push(new Leaf());},i*50);
+    }
+    animate();
+    const removeBtn=document.createElement('button');
+    removeBtn.textContent='clear + exit';
+    removeBtn.style.cssText='position:fixed;top:10px;right:10px;z-index:9999999;padding:10px 20px;background:#8B4513;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;box-shadow:0 2px 10px rgba(0,0,0,0.3);';
+    removeBtn.onclick=()=>{
+        leaves.forEach(leaf=>leaf.element.remove());
+        removeBtn.remove();
+        style.remove();
+        window.leavesActive=false;
+    };
+    document.body.appendChild(removeBtn);
 })();
-
