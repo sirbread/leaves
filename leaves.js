@@ -18,10 +18,7 @@ javascript:(function(){
     .hamburger-menu{position:fixed;top:10px;right:10px;z-index:10000000;font-family:Arial,sans-serif;}
     .hamburger-btn{width:50px;height:50px;background:#8B4513;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:0;box-shadow:0 2px 10px rgba(0,0,0,0.3);transition:transform 0.2s;}
     .hamburger-btn:hover{transform:scale(1.05);}
-    .hamburger-line{width:30px;height:3px;background:white;border-radius:2px;transition:all 0.3s;}
-    .hamburger-btn.active .hamburger-line:nth-child(1){transform:rotate(45deg) translateY(9px);}
-    .hamburger-btn.active .hamburger-line:nth-child(2){opacity:0;}
-    .hamburger-btn.active .hamburger-line:nth-child(3){transform:rotate(-45deg) translateY(-9px);}
+    .hamburger-line{width:30px;height:3px;background:white;border-radius:2px;}
     .menu-panel{position:absolute;top:60px;right:0;width:280px;background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.3);padding:20px;display:none;flex-direction:column;gap:15px;}
     .menu-panel.open{display:flex;}
     .menu-item{display:flex;flex-direction:column;gap:8px;}
@@ -185,7 +182,7 @@ javascript:(function(){
     leafCountItem.appendChild(leafCountLabel);
     leafCountItem.appendChild(leafCountDisplay);
     leafCountItem.appendChild(leafCountSlider);
-    // h
+
     const clearBtn=document.createElement('button');
     clearBtn.className='menu-btn';
     clearBtn.textContent='Clear + Exit';
@@ -197,7 +194,6 @@ javascript:(function(){
     document.body.appendChild(menuContainer);
 
     hamburgerBtn.addEventListener('click',()=>{
-        hamburgerBtn.classList.toggle('active');
         menuPanel.classList.toggle('open');
     });
 
