@@ -14,7 +14,22 @@ javascript:(function(){
     document.body.appendChild(rightBarrier);
     
     const style=document.createElement('style');
-    style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}`;
+    style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}
+    .hamburger-menu{position:fixed;top:10px;right:10px;z-index:10000000;font-family:Arial,sans-serif;}
+    .hamburger-btn{width:50px;height:50px;background:#8B4513;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:0;box-shadow:0 2px 10px rgba(0,0,0,0.3);transition:transform 0.2s;}
+    .hamburger-btn:hover{transform:scale(1.05);}
+    .hamburger-line{width:30px;height:3px;background:white;border-radius:2px;transition:all 0.3s;}
+    .hamburger-btn.active .hamburger-line:nth-child(1){transform:rotate(45deg) translateY(9px);}
+    .hamburger-btn.active .hamburger-line:nth-child(2){opacity:0;}
+    .hamburger-btn.active .hamburger-line:nth-child(3){transform:rotate(-45deg) translateY(-9px);}
+    .menu-panel{position:absolute;top:60px;right:0;width:280px;background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.3);padding:20px;display:none;flex-direction:column;gap:15px;}
+    .menu-panel.open{display:flex;}
+    .menu-item{display:flex;flex-direction:column;gap:8px;}
+    .menu-item label{font-weight:bold;color:#333;font-size:14px;}
+    .menu-item input[type="range"]{width:100%;cursor:pointer;}
+    .menu-item .value-display{color:#666;font-size:13px;}
+    .menu-btn{padding:12px;background:#8B4513;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:14px;transition:background 0.2s;}
+    .menu-btn:hover{background:#a0522d;}`;
     document.head.appendChild(style);
     const leaves=[];
     const leafImages=['https://hc-cdn.hel1.your-objectstorage.com/s/v3/c0cfd076523a1494b43f3deff2b3d7e012c892a4_image.png'];
@@ -29,7 +44,9 @@ javascript:(function(){
         if (Math.abs(mouse.x - mouse.prevX) > 50 || Math.abs(mouse.y - mouse.prevY) > 50) {
             mouse.speedX = 0;
             mouse.speedY = 0;
-        }});
+        }
+    });
+    
     class Leaf{
         constructor(){
             this.element=document.createElement('img');
@@ -134,26 +151,91 @@ javascript:(function(){
             const wobble=this.isResting?Math.sin(this.time)*2:Math.sin(this.time*2)*5;
             this.element.style.transform=`translate(${this.x}px,${this.y}px) rotate(${this.rotation+wobble}deg)`;
         }
+        remove(){
+            this.element.remove();
+        }
     }
     function animate(){
         leaves.forEach(leaf=>leaf.update());
         requestAnimationFrame(animate);
     }
-    for(let i=0;i<100;i++){
-        setTimeout(()=>{leaves.push(new Leaf());},i*50);
-    }
-    animate();
-    const removeBtn=document.createElement('button');
-    removeBtn.textContent='clear + exit';
-    removeBtn.style.cssText='position:fixed;top:10px;right:10px;z-index:9999999;padding:10px 20px;background:#8B4513;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;box-shadow:0 2px 10px rgba(0,0,0,0.3);';
-    removeBtn.onclick=()=>{
-        leaves.forEach(leaf=>leaf.element.remove());
-        removeBtn.remove();
+    
+    const menuContainer=document.createElement('div');
+    menuContainer.className='hamburger-menu';
+
+    const hamburgerBtn=document.createElement('button');
+    hamburgerBtn.className='hamburger-btn';
+    hamburgerBtn.innerHTML='<div class="hamburger-line"></div><div class="hamburger-line"></div><div class="hamburger-line"></div>';
+
+    const menuPanel=document.createElement('div');
+    menuPanel.className='menu-panel';
+
+    const leafCountItem=document.createElement('div');
+    leafCountItem.className='menu-item';
+    const leafCountLabel=document.createElement('label');
+    leafCountLabel.textContent='Leaf Count';
+    const leafCountDisplay=document.createElement('div');
+    leafCountDisplay.className='value-display';
+    leafCountDisplay.textContent='Current: 100';
+    const leafCountSlider=document.createElement('input');
+    leafCountSlider.type='range';
+    leafCountSlider.min='0';
+    leafCountSlider.max='200';
+    leafCountSlider.value='100';
+    leafCountItem.appendChild(leafCountLabel);
+    leafCountItem.appendChild(leafCountDisplay);
+    leafCountItem.appendChild(leafCountSlider);
+    // h
+    const clearBtn=document.createElement('button');
+    clearBtn.className='menu-btn';
+    clearBtn.textContent='Clear + Exit';
+
+    menuPanel.appendChild(leafCountItem);
+    menuPanel.appendChild(clearBtn);
+    menuContainer.appendChild(hamburgerBtn);
+    menuContainer.appendChild(menuPanel);
+    document.body.appendChild(menuContainer);
+
+    hamburgerBtn.addEventListener('click',()=>{
+        hamburgerBtn.classList.toggle('active');
+        menuPanel.classList.toggle('open');
+    });
+
+    leafCountSlider.addEventListener('input',(e)=>{
+        const targetCount=parseInt(e.target.value);
+        leafCountDisplay.textContent=`Current: ${targetCount}`;
+
+        if(targetCount>leaves.length){
+            const toAdd=targetCount-leaves.length;
+            for(let i=0;i<toAdd;i++){
+                setTimeout(()=>{leaves.push(new Leaf());},i*50);
+            }
+        }else if(targetCount<leaves.length){
+            const toRemove=leaves.length-targetCount;
+            for(let i=0;i<toRemove;i++){
+                const leaf=leaves.pop();
+                if(leaf){
+                    leaf.remove();
+                }
+            }
+        }
+    });
+
+
+    clearBtn.addEventListener('click',()=>{
+        leaves.forEach(leaf=>leaf.remove());
+        leaves.length=0;
+        menuContainer.remove();
         style.remove();
         container.remove();
         leftBarrier.remove();
         rightBarrier.remove();
         window.leavesActive=false;
-    };
-    document.body.appendChild(removeBtn);
+    });
+    
+    for(let i=0;i<100;i++){
+        setTimeout(()=>{leaves.push(new Leaf());},i*50);
+    }
+    
+    animate();
 })();
