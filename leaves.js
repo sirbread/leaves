@@ -42,13 +42,16 @@ javascript:(function(){
             this.x=Math.random()*window.innerWidth;
             this.y=-100;
             this.time=0;
-            this.velocityY=0.5+Math.random()*1.5;
-            this.velocityX=(Math.random()-0.5)*1;
+            this.velocityY=0.3+Math.random()*0.5;
+            this.velocityX=(Math.random()-0.5)*0.5;
             this.rotation=Math.random()*360;
-            this.rotationSpeed=(Math.random()-0.5)*5;
-            this.swayAmplitude=20+Math.random()*30;
-            this.swaySpeed=0.02+Math.random()*0.03;
+            this.rotationSpeed=(Math.random()-0.5)*3;
+            this.swayAmplitude=40+Math.random()*60;
+            this.swaySpeed=0.015+Math.random()*0.02;
             this.swayOffset=Math.random()*Math.PI*2;
+            this.swayAmplitude2=20+Math.random()*30;
+            this.swaySpeed2=0.025+Math.random()*0.03;
+            this.swayOffset2=Math.random()*Math.PI*2;
             this.isDragging=false;
             this.dragVelocityX=0;
             this.dragVelocityY=0;
@@ -57,7 +60,7 @@ javascript:(function(){
             this.isResting=false;
             this.restY=0;
             this.restX=0;
-            this.friction=0.98;
+            this.friction=0.99;
             this.bounce=0.3;
             this.setupInteraction();
         }
@@ -90,14 +93,16 @@ javascript:(function(){
             this.checkMouseInteraction();
             this.time+=0.016;
             if(!this.isResting){
-                this.velocityY+=0.08;
-                this.velocityY=Math.min(this.velocityY,3);
-                const sway=Math.sin(this.time*this.swaySpeed+this.swayOffset)*this.swayAmplitude*0.1;
-                this.x+=this.velocityX+sway;
+                this.velocityY+=0.05;
+                this.velocityY=Math.min(this.velocityY,2);
+                const sway1=Math.sin(this.time*this.swaySpeed+this.swayOffset)*this.swayAmplitude*0.05;
+                const sway2=Math.sin(this.time*this.swaySpeed2+this.swayOffset2)*this.swayAmplitude2*0.03;
+                const totalSway=sway1+sway2;
+                this.x+=this.velocityX+totalSway;
                 this.y+=this.velocityY;
                 this.velocityX*=this.friction;
-                this.rotation+=this.rotationSpeed;
-                this.rotationSpeed*=0.97;
+                this.rotation+=this.rotationSpeed+(totalSway*0.5);
+                this.rotationSpeed*=0.98;
                 const groundY=window.innerHeight-(this.leafWidth*0.7);
                 if(this.y>=groundY){
                     this.y=groundY;
@@ -126,7 +131,7 @@ javascript:(function(){
                 this.rotation+=this.rotationSpeed;
                 this.rotationSpeed*=0.95;
             }
-            const wobble=this.isResting?Math.sin(this.time)*2:Math.sin(this.time*2)*10;
+            const wobble=this.isResting?Math.sin(this.time)*2:Math.sin(this.time*2)*5;
             this.element.style.transform=`translate(${this.x}px,${this.y}px) rotate(${this.rotation+wobble}deg)`;
         }
     }
