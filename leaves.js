@@ -35,7 +35,8 @@ javascript:(function(){
             this.element=document.createElement('img');
             this.element.className='autumn-leaf';
             this.element.src=leafImages[Math.floor(Math.random()*leafImages.length)];
-            this.element.style.width=(30+Math.random()*40)+'px';
+            this.leafWidth=30+Math.random()*40;
+            this.element.style.width=this.leafWidth+'px';
             this.element.draggable=false;
             container.appendChild(this.element);
             this.x=Math.random()*window.innerWidth;
@@ -97,7 +98,7 @@ javascript:(function(){
                 this.velocityX*=this.friction;
                 this.rotation+=this.rotationSpeed;
                 this.rotationSpeed*=0.97;
-                const groundY=window.innerHeight-(this.element.height?this.element.height*0.7:20);
+                const groundY=window.innerHeight-(this.leafWidth*0.7);
                 if(this.y>=groundY){
                     this.y=groundY;
                     this.velocityY*=-this.bounce;
@@ -115,8 +116,8 @@ javascript:(function(){
                     this.x=barrierWidth;
                     this.velocityX=Math.abs(this.velocityX)*0.6;
                 }
-                if(this.x>window.innerWidth-barrierWidth-this.element.width){
-                    this.x=window.innerWidth-barrierWidth-this.element.width;
+                if(this.x+this.leafWidth>window.innerWidth-barrierWidth){
+                    this.x=window.innerWidth-barrierWidth-this.leafWidth;
                     this.velocityX=-Math.abs(this.velocityX)*0.6;
                 }
             }else{
