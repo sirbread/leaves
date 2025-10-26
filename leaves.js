@@ -4,6 +4,15 @@ javascript:(function(){
     const container=document.createElement('div');
     container.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:999998;overflow:hidden;';
     document.body.appendChild(container);
+    
+    const leftBarrier=document.createElement('div');
+    leftBarrier.style.cssText='position:fixed;top:0;left:0;width:10px;height:100vh;pointer-events:none;z-index:999997;';
+    document.body.appendChild(leftBarrier);
+    
+    const rightBarrier=document.createElement('div');
+    rightBarrier.style.cssText='position:fixed;top:0;right:0;width:10px;height:100vh;pointer-events:none;z-index:999997;';
+    document.body.appendChild(rightBarrier);
+    
     const style=document.createElement('style');
     style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}`;
     document.head.appendChild(style);
@@ -101,13 +110,14 @@ javascript:(function(){
                         this.rotationSpeed*=0.5;
                     }
                 }
-                if(this.x<-50){
-                    this.x=-50;
-                    this.velocityX*=-0.5;
+                const barrierWidth=10;
+                if(this.x<barrierWidth){
+                    this.x=barrierWidth;
+                    this.velocityX=Math.abs(this.velocityX)*0.6;
                 }
-                if(this.x>window.innerWidth+50){
-                    this.x=window.innerWidth+50;
-                    this.velocityX*=-0.5;
+                if(this.x>window.innerWidth-barrierWidth-this.element.width){
+                    this.x=window.innerWidth-barrierWidth-this.element.width;
+                    this.velocityX=-Math.abs(this.velocityX)*0.6;
                 }
             }else{
                 this.x=this.restX;
@@ -135,6 +145,8 @@ javascript:(function(){
         removeBtn.remove();
         style.remove();
         container.remove();
+        leftBarrier.remove();
+        rightBarrier.remove();
         window.leavesActive=false;
     };
     document.body.appendChild(removeBtn);
