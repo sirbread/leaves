@@ -23,7 +23,12 @@ javascript:(function(){
     .menu-item input[type="range"]{width:100%;cursor:pointer;}
     .menu-item .value-display{color:#666;font-size:13px;}
     .menu-btn{padding:12px;background:#8B4513;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:14px;transition:background 0.2s;}
-    .menu-btn:hover{background:#a0522d;}`;
+    .menu-btn:hover{background:#a0522d;}
+    .x-line{position:absolute;width:30px;height:3px;background:white;border-radius:2px;top:23px;left:10px;}
+    .x1{transform:rotate(45deg);}
+    .x2{transform:rotate(-45deg);}
+    .hamburger-btn{position:relative;}
+    `;
     document.head.appendChild(style);
     const leaves=[];
     const leafImages=['https://hc-cdn.hel1.your-objectstorage.com/s/v3/c0cfd076523a1494b43f3deff2b3d7e012c892a4_image.png'];
@@ -194,9 +199,18 @@ javascript:(function(){
     menuContainer.appendChild(hamburgerBtn);
     menuContainer.appendChild(menuPanel);
     document.body.appendChild(menuContainer);
+    function setHamburgerIcon(open) {
+        if (open) {
+            hamburgerBtn.innerHTML = '<div class="x-line x1"></div><div class="x-line x2"></div>';
+        } else {
+            hamburgerBtn.innerHTML = '<div class="hamburger-line"></div><div class="hamburger-line"></div><div class="hamburger-line"></div>';
+        }
+    }
     hamburgerBtn.addEventListener('click',()=>{
-        menuPanel.classList.toggle('open');
+        const isOpen = menuPanel.classList.toggle('open');
+        setHamburgerIcon(isOpen);
     });
+    setHamburgerIcon(false);
     leafCountSlider.addEventListener('input',(e)=>{
         const targetCount=parseInt(e.target.value);
         leafCountDisplay.textContent=`Current: ${targetCount}`;
