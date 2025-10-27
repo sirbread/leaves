@@ -47,6 +47,8 @@ javascript:(function(){
             this.element.src=leafImages[Math.floor(Math.random()*leafImages.length)];
             this.leafWidth=30+Math.random()*40;
             this.element.style.width=this.leafWidth+'px';
+            const hue=Math.random()*30;
+            this.element.style.filter=`hue-rotate(${hue}deg)`;
             this.element.draggable=false;
             container.appendChild(this.element);
             this.x=Math.random()*window.innerWidth;
