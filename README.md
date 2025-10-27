@@ -1,7 +1,7 @@
 # leaves
 todo
 - add scrollbar support
-- add rake, leafblower, and leaf magnet, and exit in one menu
+- ~~add rake, leafblower, and leaf magnet, and exit in one menu~~
 - ~~more leaf pics~~
 - ~~add leaf swaying~~
 - ~~variable leaf size~~

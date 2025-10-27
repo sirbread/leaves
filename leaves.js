@@ -13,7 +13,7 @@ javascript:(function(){
     const style=document.createElement('style');
     style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}
     .hamburger-menu{position:fixed;top:10px;right:10px;z-index:10000000;font-family:Arial,sans-serif;}
-    .hamburger-btn{width:50px;height:50px;background:#8B4513;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:0;box-shadow:0 2px 10px rgba(0,0,0,0.3);transition:transform 0.2s;}
+    .hamburger-btn{width:50px;height:50px;background:#8B4513;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:0;box-shadow:0 2px 10px rgba(0,0,0,0.3);transition:transform 0.2s;position:relative;}
     .hamburger-btn:hover{transform:scale(1.05);}
     .hamburger-line{width:30px;height:3px;background:white;border-radius:2px;}
     .menu-panel{position:absolute;top:60px;right:0;width:280px;background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.3);padding:20px;display:none;flex-direction:column;gap:15px;}
@@ -24,15 +24,23 @@ javascript:(function(){
     .menu-item .value-display{color:#666;font-size:13px;}
     .menu-btn{padding:12px;background:#8B4513;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:14px;transition:background 0.2s;}
     .menu-btn:hover{background:#a0522d;}
+    .menu-btn.active{background:#228B22;}
+    .menu-btn.active:hover{background:#2aa02a;}
     .x-line{position:absolute;width:30px;height:3px;background:white;border-radius:2px;top:23px;left:10px;}
     .x1{transform:rotate(45deg);}
     .x2{transform:rotate(-45deg);}
-    .hamburger-btn{position:relative;}
     `;
     document.head.appendChild(style);
     const leaves=[];
     const leafImages=['https://hc-cdn.hel1.your-objectstorage.com/s/v3/c0cfd076523a1494b43f3deff2b3d7e012c892a4_image.png'];
     const mouse={x:0,y:0,prevX:0,prevY:0,speedX:0,speedY:0};
+
+    const tools={
+        rake:false,
+        blower:false,
+        magnet:false
+    };
+
     document.addEventListener('mousemove',(e)=>{
         mouse.prevX=mouse.x;
         mouse.prevY=mouse.y;
@@ -93,17 +101,50 @@ javascript:(function(){
             const dx=this.x-mouse.x;
             const dy=this.y-mouse.y;
             const distance=Math.sqrt(dx*dx+dy*dy);
-            const cursorRadius=40;
-            if(distance<cursorRadius){
-                const mouseSpeed=Math.sqrt(mouse.speedX*mouse.speedX+mouse.speedY*mouse.speedY);
-                const force=Math.max(mouseSpeed*0.8,5);
-                const angle=Math.atan2(dy,dx);
-                const pushX=Math.cos(angle)*force;
-                const pushY=Math.sin(angle)*force;
-                this.velocityX+=pushX;
-                this.velocityY+=pushY-2;
-                this.rotationSpeed+=(Math.random()-0.5)*20;
-                this.isResting=false;
+            if(tools.magnet){
+                const magnetRadius=200;
+                if(distance<magnetRadius){
+                    const attractionForce=0.5;
+                    const angle=Math.atan2(-dy,-dx);
+                    this.velocityX+=Math.cos(angle)*attractionForce;
+                    this.velocityY+=Math.sin(angle)*attractionForce;
+                    this.rotationSpeed+=(Math.random()-0.5)*5;
+                    this.isResting=false;
+                }
+            }
+            else if(tools.blower){
+                const blowerRadius=150;
+                if(distance<blowerRadius){
+                    const blowForce=2.5;
+                    const angle=Math.atan2(dy,dx);
+                    this.velocityX+=Math.cos(angle)*blowForce;
+                    this.velocityY+=Math.sin(angle)*blowForce;
+                    this.rotationSpeed+=(Math.random()-0.5)*25;
+                    this.isResting=false;
+                }
+            }
+            else if(tools.rake){
+                const rakeRadius=60;
+                if(distance<rakeRadius&&(Math.abs(mouse.speedX)>1||Math.abs(mouse.speedY)>1)){
+                    this.velocityX+=mouse.speedX*0.8;
+                    this.velocityY+=mouse.speedY*0.8;
+                    this.rotationSpeed+=(Math.random()-0.5)*20;
+                    this.isResting=false;
+                }
+            }
+            else{
+                const cursorRadius=40;
+                if(distance<cursorRadius){
+                    const mouseSpeed=Math.sqrt(mouse.speedX*mouse.speedX+mouse.speedY*mouse.speedY);
+                    const force=Math.max(mouseSpeed*0.8,5);
+                    const angle=Math.atan2(dy,dx);
+                    const pushX=Math.cos(angle)*force;
+                    const pushY=Math.sin(angle)*force;
+                    this.velocityX+=pushX;
+                    this.velocityY+=pushY-2;
+                    this.rotationSpeed+=(Math.random()-0.5)*20;
+                    this.isResting=false;
+                }
             }
         }
         update(){
@@ -179,10 +220,10 @@ javascript:(function(){
     const leafCountItem=document.createElement('div');
     leafCountItem.className='menu-item';
     const leafCountLabel=document.createElement('label');
-    leafCountLabel.textContent='Leaf Count';
+    leafCountLabel.textContent='leaf count';
     const leafCountDisplay=document.createElement('div');
     leafCountDisplay.className='value-display';
-    leafCountDisplay.textContent='Current: 100';
+    leafCountDisplay.textContent='current: 100';
     const leafCountSlider=document.createElement('input');
     leafCountSlider.type='range';
     leafCountSlider.min='0';
@@ -191,10 +232,22 @@ javascript:(function(){
     leafCountItem.appendChild(leafCountLabel);
     leafCountItem.appendChild(leafCountDisplay);
     leafCountItem.appendChild(leafCountSlider);
+    const rakeBtn=document.createElement('button');
+    rakeBtn.className='menu-btn';
+    rakeBtn.textContent='rake';
+    const blowerBtn=document.createElement('button');
+    blowerBtn.className='menu-btn';
+    blowerBtn.textContent='leaf blower';
+    const magnetBtn=document.createElement('button');
+    magnetBtn.className='menu-btn';
+    magnetBtn.textContent='leaf magnet';
     const clearBtn=document.createElement('button');
     clearBtn.className='menu-btn';
-    clearBtn.textContent='Clear + Exit';
+    clearBtn.textContent='clear + exit';
     menuPanel.appendChild(leafCountItem);
+    menuPanel.appendChild(rakeBtn);
+    menuPanel.appendChild(blowerBtn);
+    menuPanel.appendChild(magnetBtn);
     menuPanel.appendChild(clearBtn);
     menuContainer.appendChild(hamburgerBtn);
     menuContainer.appendChild(menuPanel);
@@ -206,14 +259,51 @@ javascript:(function(){
             hamburgerBtn.innerHTML = '<div class="hamburger-line"></div><div class="hamburger-line"></div><div class="hamburger-line"></div>';
         }
     }
+    function deactivateAllTools(){
+        tools.rake=false;
+        tools.blower=false;
+        tools.magnet=false;
+        rakeBtn.classList.remove('active');
+        blowerBtn.classList.remove('active');
+        magnetBtn.classList.remove('active');
+    }
     hamburgerBtn.addEventListener('click',()=>{
         const isOpen = menuPanel.classList.toggle('open');
         setHamburgerIcon(isOpen);
     });
     setHamburgerIcon(false);
+    rakeBtn.addEventListener('click',()=>{
+        if(tools.rake){
+            deactivateAllTools();
+        }else{
+            deactivateAllTools();
+            tools.rake=true;
+            rakeBtn.classList.add('active');
+        }
+    });
+    blowerBtn.addEventListener('click',()=>{
+        if(tools.blower){
+            deactivateAllTools();
+        }else{
+            deactivateAllTools();
+            tools.blower=true;
+            blowerBtn.classList.add('active');
+        }
+    });
+    magnetBtn.addEventListener('click',()=>{
+        if(tools.magnet){
+            deactivateAllTools();
+        }else{
+            deactivateAllTools();
+            tools.magnet=true;
+            magnetBtn.classList.add('active');
+        }
+    });
+
+
     leafCountSlider.addEventListener('input',(e)=>{
         const targetCount=parseInt(e.target.value);
-        leafCountDisplay.textContent=`Current: ${targetCount}`;
+        leafCountDisplay.textContent=`current: ${targetCount}`;
         if(targetCount>leaves.length){
             const toAdd=targetCount-leaves.length;
             for(let i=0;i<toAdd;i++){
