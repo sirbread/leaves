@@ -40,7 +40,8 @@ javascript:(function(){
         blower:false,
         magnet:false
     };
-
+    let windEnabled=false;
+    let windStrength=1.5;
     document.addEventListener('mousemove',(e)=>{
         mouse.prevX=mouse.x;
         mouse.prevY=mouse.y;
@@ -156,6 +157,10 @@ javascript:(function(){
                 const sway1=Math.sin(this.time*this.swaySpeed+this.swayOffset)*this.swayAmplitude*0.05;
                 const sway2=Math.sin(this.time*this.swaySpeed2+this.swayOffset2)*this.swayAmplitude2*0.03;
                 const totalSway=sway1+sway2;
+                if(windEnabled){
+                    const windForce=-windStrength*(0.8+Math.sin(this.time*0.5+this.swayOffset)*0.2);
+                    this.velocityX+=windForce*0.05;
+                }
                 this.x+=this.velocityX+totalSway;
                 this.y+=this.velocityY;
                 this.velocityX*=this.friction;
@@ -194,6 +199,21 @@ javascript:(function(){
                     this.isResting=false;
                 }
             }else{
+                if(windEnabled){
+                    const windPush=-windStrength*(0.8+Math.sin(this.time*0.5+this.swayOffset)*0.2)*0.02;
+                    this.restX+=windPush;
+                    const barrierWidth=10;
+                    if(this.restX<barrierWidth){
+                        this.restX=barrierWidth+1;
+                        this.isResting=false;
+                        this.velocityX=2+Math.random()*2.5;
+                        this.velocityY=0.3+Math.random()*0.5;
+                    }
+                    if(this.restX+this.leafWidth>window.innerWidth-barrierWidth){
+                        this.restX=window.innerWidth-barrierWidth-this.leafWidth-1;
+                    }
+                }
+
                 this.x=this.restX;
                 this.y=this.restY;
                 this.rotation+=this.rotationSpeed;
@@ -232,6 +252,22 @@ javascript:(function(){
     leafCountItem.appendChild(leafCountLabel);
     leafCountItem.appendChild(leafCountDisplay);
     leafCountItem.appendChild(leafCountSlider);
+    const windItem=document.createElement('div');
+    windItem.className='menu-item';
+    const windLabel=document.createElement('label');
+    windLabel.textContent='Wind Strength';
+    const windDisplay=document.createElement('div');
+    windDisplay.className='value-display';
+    windDisplay.textContent='Off';
+    const windSlider=document.createElement('input');
+    windSlider.type='range';
+    windSlider.min='0';
+    windSlider.max='5';
+    windSlider.step='0.5';
+    windSlider.value='0';
+    windItem.appendChild(windLabel);
+    windItem.appendChild(windDisplay);
+    windItem.appendChild(windSlider);
     const rakeBtn=document.createElement('button');
     rakeBtn.className='menu-btn';
     rakeBtn.textContent='rake';
@@ -245,6 +281,7 @@ javascript:(function(){
     clearBtn.className='menu-btn';
     clearBtn.textContent='clear + exit';
     menuPanel.appendChild(leafCountItem);
+    menuPanel.appendChild(windItem);
     menuPanel.appendChild(rakeBtn);
     menuPanel.appendChild(blowerBtn);
     menuPanel.appendChild(magnetBtn);
@@ -317,6 +354,16 @@ javascript:(function(){
                     leaf.remove();
                 }
             }
+        }
+    });
+    windSlider.addEventListener('input',(e)=>{
+        windStrength=parseFloat(e.target.value);
+        if(windStrength===0){
+            windEnabled=false;
+            windDisplay.textContent='Off';
+        }else{
+            windEnabled=true;
+            windDisplay.textContent=`${windStrength.toFixed(1)}`;
         }
     });
     clearBtn.addEventListener('click',()=>{
