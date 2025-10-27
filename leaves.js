@@ -4,15 +4,12 @@ javascript:(function(){
     const container=document.createElement('div');
     container.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:999998;overflow:hidden;';
     document.body.appendChild(container);
-    
     const leftBarrier=document.createElement('div');
     leftBarrier.style.cssText='position:fixed;top:0;left:0;width:10px;height:100vh;pointer-events:none;z-index:999997;';
     document.body.appendChild(leftBarrier);
-    
     const rightBarrier=document.createElement('div');
     rightBarrier.style.cssText='position:fixed;top:0;right:0;width:10px;height:100vh;pointer-events:none;z-index:999997;';
     document.body.appendChild(rightBarrier);
-    
     const style=document.createElement('style');
     style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}
     .hamburger-menu{position:fixed;top:10px;right:10px;z-index:10000000;font-family:Arial,sans-serif;}
@@ -43,7 +40,6 @@ javascript:(function(){
             mouse.speedY = 0;
         }
     });
-    
     class Leaf{
         constructor(){
             this.element=document.createElement('img');
@@ -132,12 +128,22 @@ javascript:(function(){
                 }
                 const barrierWidth=10;
                 if(this.x<barrierWidth){
-                    this.x=barrierWidth;
-                    this.velocityX=Math.abs(this.velocityX)*0.6;
+                    this.x=barrierWidth+1;
+                    this.velocityX=2+Math.random()*2.5;
+                    this.velocityY=0.3+Math.random()*0.5;
+                    this.swayOffset=Math.random()*Math.PI*2;
+                    this.swayOffset2=Math.random()*Math.PI*2;
+                    this.rotationSpeed=(Math.random()-0.5)*10;
+                    this.isResting=false;
                 }
                 if(this.x+this.leafWidth>window.innerWidth-barrierWidth){
-                    this.x=window.innerWidth-barrierWidth-this.leafWidth;
-                    this.velocityX=-Math.abs(this.velocityX)*0.6;
+                    this.x=window.innerWidth-barrierWidth-this.leafWidth-1;
+                    this.velocityX=-(2+Math.random()*2.5);
+                    this.velocityY=0.3+Math.random()*0.5;
+                    this.swayOffset=Math.random()*Math.PI*2;
+                    this.swayOffset2=Math.random()*Math.PI*2;
+                    this.rotationSpeed=(Math.random()-0.5)*10;
+                    this.isResting=false;
                 }
             }else{
                 this.x=this.restX;
@@ -156,17 +162,13 @@ javascript:(function(){
         leaves.forEach(leaf=>leaf.update());
         requestAnimationFrame(animate);
     }
-    
     const menuContainer=document.createElement('div');
     menuContainer.className='hamburger-menu';
-
     const hamburgerBtn=document.createElement('button');
     hamburgerBtn.className='hamburger-btn';
     hamburgerBtn.innerHTML='<div class="hamburger-line"></div><div class="hamburger-line"></div><div class="hamburger-line"></div>';
-
     const menuPanel=document.createElement('div');
     menuPanel.className='menu-panel';
-
     const leafCountItem=document.createElement('div');
     leafCountItem.className='menu-item';
     const leafCountLabel=document.createElement('label');
@@ -182,25 +184,20 @@ javascript:(function(){
     leafCountItem.appendChild(leafCountLabel);
     leafCountItem.appendChild(leafCountDisplay);
     leafCountItem.appendChild(leafCountSlider);
-
     const clearBtn=document.createElement('button');
     clearBtn.className='menu-btn';
     clearBtn.textContent='Clear + Exit';
-
     menuPanel.appendChild(leafCountItem);
     menuPanel.appendChild(clearBtn);
     menuContainer.appendChild(hamburgerBtn);
     menuContainer.appendChild(menuPanel);
     document.body.appendChild(menuContainer);
-
     hamburgerBtn.addEventListener('click',()=>{
         menuPanel.classList.toggle('open');
     });
-
     leafCountSlider.addEventListener('input',(e)=>{
         const targetCount=parseInt(e.target.value);
         leafCountDisplay.textContent=`Current: ${targetCount}`;
-
         if(targetCount>leaves.length){
             const toAdd=targetCount-leaves.length;
             for(let i=0;i<toAdd;i++){
@@ -216,8 +213,6 @@ javascript:(function(){
             }
         }
     });
-
-
     clearBtn.addEventListener('click',()=>{
         leaves.forEach(leaf=>leaf.remove());
         leaves.length=0;
@@ -228,10 +223,8 @@ javascript:(function(){
         rightBarrier.remove();
         window.leavesActive=false;
     });
-    
     for(let i=0;i<100;i++){
         setTimeout(()=>{leaves.push(new Leaf());},i*50);
     }
-    
     animate();
 })();
