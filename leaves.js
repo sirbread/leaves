@@ -11,7 +11,7 @@ javascript:(function(){
     rightBarrier.style.cssText='position:fixed;top:0;right:0;width:10px;height:100vh;pointer-events:none;z-index:999997;';
     document.body.appendChild(rightBarrier);
     const style=document.createElement('style');
-    style.textContent=`.autumn-leaf{position:fixed;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}
+    style.textContent=`.autumn-leaf{position:absolute;pointer-events:auto;cursor:pointer;user-select:none;z-index:999999;will-change:transform;}
     .hamburger-menu{position:fixed;top:10px;right:10px;z-index:10000000;font-family:Arial,sans-serif;}
     .hamburger-btn{width:50px;height:50px;background:#8B4513;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:0;box-shadow:0 2px 10px rgba(0,0,0,0.3);transition:transform 0.2s;position:relative;}
     .hamburger-btn:hover{transform:scale(1.05);}
@@ -33,20 +33,28 @@ javascript:(function(){
     document.head.appendChild(style);
     const leaves=[];
     const leafImages=['https://hc-cdn.hel1.your-objectstorage.com/s/v3/c0cfd076523a1494b43f3deff2b3d7e012c892a4_image.png'];
-    const mouse={x:0,y:0,prevX:0,prevY:0,speedX:0,speedY:0};
-
+    const mouse={x:0,y:0,prevX:0,prevY:0,speedX:0,speedY:0,scrollY:0};
     const tools={
         rake:false,
         blower:false,
         magnet:false
     };
+
     let windEnabled=false;
     let windStrength=1.5;
+
+    function getMousePosition(e){
+        return {
+            x: e.clientX,
+            y: e.clientY + window.scrollY
+        };
+    }
     document.addEventListener('mousemove',(e)=>{
+        const pos = getMousePosition(e);
         mouse.prevX=mouse.x;
         mouse.prevY=mouse.y;
-        mouse.x=e.clientX;
-        mouse.y=e.clientY;
+        mouse.x=pos.x;
+        mouse.y=pos.y;
         mouse.speedX=(mouse.x-mouse.prevX)*0.5;
         mouse.speedY=(mouse.y-mouse.prevY)*0.5;
         if (Math.abs(mouse.x - mouse.prevX) > 50 || Math.abs(mouse.y - mouse.prevY) > 50) {
@@ -54,6 +62,11 @@ javascript:(function(){
             mouse.speedY = 0;
         }
     });
+
+    window.addEventListener('scroll',()=>{
+        mouse.scrollY = window.scrollY;
+    });
+
     class Leaf{
         constructor(){
             this.element=document.createElement('img');
@@ -64,9 +77,9 @@ javascript:(function(){
             const hue=Math.random()*30;
             this.element.style.filter=`hue-rotate(${hue}deg)`;
             this.element.draggable=false;
-            container.appendChild(this.element);
+            document.body.appendChild(this.element);
             this.x=Math.random()*window.innerWidth;
-            this.y=-100;
+            this.y=window.scrollY-100;
             this.time=0;
             this.velocityY=0.3+Math.random()*0.5;
             this.velocityX=(Math.random()-0.5)*0.5;
@@ -166,7 +179,14 @@ javascript:(function(){
                 this.velocityX*=this.friction;
                 this.rotation+=this.rotationSpeed+(totalSway*0.5);
                 this.rotationSpeed*=0.98;
-                const groundY=window.innerHeight-(this.leafWidth*0.7);
+                const pageHeight=Math.max(
+                    document.body.scrollHeight,
+                    document.body.offsetHeight,
+                    document.documentElement.clientHeight,
+                    document.documentElement.scrollHeight,
+                    document.documentElement.offsetHeight
+                );
+                const groundY=pageHeight-(this.leafWidth*0.7);
                 if(this.y>=groundY){
                     this.y=groundY;
                     this.velocityY*=-this.bounce;
